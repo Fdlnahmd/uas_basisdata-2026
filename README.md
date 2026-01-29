@@ -1,5 +1,5 @@
 # Dokumentasi UAS Basis Data
-
+# Note : Hasil Visualisasi ada di /root/perkuliahan/uas_basisdata/metabase/data/metabase.db/Visualisasi Metabase/image.png
 ## Persiapan Awal
 
 ### 1. Pastikan Tools Sudah Terinstall
