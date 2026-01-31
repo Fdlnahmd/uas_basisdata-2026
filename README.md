@@ -1650,10 +1650,11 @@ Filter akan muncul di atas dashboard
 
 ---
 
-### Membuat Dashboard
+### Membuat Minio
 Setup minio basis data
 
 1. Tambahkan service minio pada file docker-compose.yml (sejajarkan dengan metabase)
+
 minio:
     image: minio/minio:latest
     container_name: ${COMPOSE_PROJECT_NAME}_minio
