@@ -20,6 +20,7 @@ return new class extends Migration
             $table->enum('status', ['aktif','nonaktif'])->default('aktif');
             $table->enum('tipe_rs', ['A','B', 'C'])->default('C');
             $table->timestamps();
+            $table->string('upload_gambar')->nullable();
         });
     }
 

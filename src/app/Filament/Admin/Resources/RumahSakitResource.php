@@ -50,6 +50,11 @@ class RumahSakitResource extends Resource
                     ->required(),
                 Forms\Components\TextInput::make('tipe_rs')
                     ->required(),
+                Forms\Components\FileUpload::make('upload_gambar')
+                ->disk('minio')
+                ->visibility('public')
+                ->image()
+                ->maxSize(2048)   
             ]);
     }
 
