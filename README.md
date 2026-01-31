@@ -1650,6 +1650,110 @@ Filter akan muncul di atas dashboard
 
 ---
 
+### Membuat Dashboard
+Setup minio basis data
+
+1. Tambahkan service minio pada file docker-compose.yml (sejajarkan dengan metabase)
+minio:
+    image: minio/minio:latest
+    container_name: ${COMPOSE_PROJECT_NAME}_minio
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    volumes:
+      - ./minio/data:/data
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+2. command docker-compose down / docker compose down (tergantung versi docker dicoba aja)
+3. command docker-compose up -d / docker compose up -d (tergantung versi docker dicoba aja)
+4. setelah berhasil, login minio di http://localhost:9000
+
+5. buat bucket baru pada http://localhost:9000
+
+6. command docker ps
+ 
+7. check container id pada minio/minio:latest (bisa juga pakai container_name)
+8. docker exec -it container_id sh (bisa juga pakai container_name)
+9. lakukan command berikut
+        - mc alias set myminio http://127.0.0.1:9000 minioadmin minioadmin
+	- mc anonymous set download myminio/nama-bucket
+	- mc anonymous set public myminio/nama-bucket
+10. command exit
+11. command docker ps
+12. check container id pada container php (bisa juga pakai container_name)
+13. docker exec -it container_id_php sh (bisa juga pakai container_name)
+14. command composer require league/flysystem-aws-s3-v3 "^3.0"
+15. tunggu selesai lalu kalo udh command php artisan livewire:publish --config
+16. buka file config/livewire.php ubah value pada disk menjadi 'local'
+17. exit
+
+Setup minio upload image
+-- SHORTCUT buat yang belom tahu
+cara cepat menemukan file : CTRL + P , cari nama filenya dan enter
+
+1. tambahkan script berikut pada file filesystems.php dibawah s3 
+
+        'minio' => [
+            'driver' => 's3',
+            'key' => env('MINIO_ACCESS_KEY'),
+            'secret' => env('MINIO_SECRET_KEY'),
+            'region' => env('MINIO_REGION'),
+            'bucket' => env('MINIO_BUCKET'),
+            'url' => env('MINIO_URL') . '/' . env('MINIO_BUCKET'),
+            'endpoint' => env('MINIO_ENDPOINT'),
+            'use_path_style_endpoint' => env('MINIO_USE_PATH_STYLE_ENDPOINT', false),
+            'visibility' => 'public',
+            'throw' => false,
+            'report' => false,
+        ],
+
+2. buka dan ubah file .env (didalam folder src)
+FILESYSTEM_DISK=minio
+
+dan tambahkan di paling akhir script berikut (sesuaikan dengan nama bucket yang dibuat sebelumnya)
+
+MINIO_ACCESS_KEY=minioadmin
+MINIO_SECRET_KEY=minioadmin
+MINIO_REGION=us-east-1
+MINIO_BUCKET=test
+MINIO_ENDPOINT=http://minio:9000
+MINIO_URL=http://localhost:9000
+MINIO_USE_PATH_STYLE_ENDPOINT=true
+ 
+
+3. buka dan ubah file migration (misalnya rumah sakit : create_rumah_sakits_table)
+tambahkan script berikut
+$table->string('upload_gambar')->nullable();
+
+4. jalankan command DCI
+
+5. buka dan ubah file resource (misalnya rumah sakit : RumahSakitResource.php)
+
+6. di file resource
+ubah yang bagian Forms\Components\FileUpload::make('upload_gambar')
+
+menjadi
+
+ Forms\Components\FileUpload::make('upload_gambar')
+                ->disk('minio')
+                ->visibility('public')
+                ->image()
+                ->maxSize(2048)
+
+7. Test tambahkan rumah sakit dan upload image nya
+
+
+---
+
 ## Git Push ke GitHub
 
 ### Langkah-langkah:
